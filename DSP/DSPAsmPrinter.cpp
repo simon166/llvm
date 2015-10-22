@@ -86,7 +86,7 @@ void DSPAsmPrinter::printSavedRegsBitmask(raw_ostream &O) {
 	}
 	CPUTopSavedRegOff = CPUBitmask ? -CPURegSize : 0;
 	// Print CPUBitmask
-	O << "\t.mask \t"; printHex32(CPUBitmask, O);
+	O << "#\t.mask \t"; printHex32(CPUBitmask, O);
 	O << ', ' << CPUTopSavedRegOff << '\n';
 }
 // Print a 32 bit hex number with all numbers.
@@ -109,7 +109,7 @@ void DSPAsmPrinter::emitFrameDirective() {
 	unsigned returnReg = RI.getRARegister();
 	unsigned stackSize = MF->getFrameInfo()->getStackSize();
 	if (OutStreamer.hasRawTextSupport())
-		OutStreamer.EmitRawText("\t.frame\t$" +
+		OutStreamer.EmitRawText("#\t.frame\t$" +
 		StringRef(DSPInstPrinter::getRegisterName(stackReg)).upper() +
 		"," + Twine(stackSize) + ",$" +
 		StringRef(DSPInstPrinter::getRegisterName(returnReg)).upper());
@@ -126,7 +126,7 @@ const char *DSPAsmPrinter::getCurrentABIString() const {
 // main:
 void DSPAsmPrinter::EmitFunctionEntryLabel() {
 	if (OutStreamer.hasRawTextSupport())
-		OutStreamer.EmitRawText("\t.ent\t" + Twine(CurrentFnSym->getName()));
+		OutStreamer.EmitRawText("#\t.ent\t" + Twine(CurrentFnSym->getName()));
 	OutStreamer.EmitLabel(CurrentFnSym);
 }
 
@@ -147,10 +147,10 @@ void DSPAsmPrinter::EmitFunctionBodyStart() {
 		raw_svector_ostream OS(Str);
 		printSavedRegsBitmask(OS);
 		OutStreamer.EmitRawText(OS.str());
-		OutStreamer.EmitRawText(StringRef("\t.set\tnoreorder"));
-		OutStreamer.EmitRawText(StringRef("\t.set\tnomacro"));
+		OutStreamer.EmitRawText(StringRef("#\t.set\tnoreorder"));
+		OutStreamer.EmitRawText(StringRef("#\t.set\tnomacro"));
 		if (DSPFI->getEmitNOAT())
-			OutStreamer.EmitRawText(StringRef("\t.set\tnoat"));
+			OutStreamer.EmitRawText(StringRef("#\t.set\tnoat"));
 	}
 
 	//global address 
@@ -167,10 +167,10 @@ void DSPAsmPrinter::EmitFunctionBodyEnd() {
 	// break with BB logic.
 	if (OutStreamer.hasRawTextSupport()) {
 		if (DSPFI->getEmitNOAT())
-			OutStreamer.EmitRawText(StringRef("\t.set\tat"));
-		OutStreamer.EmitRawText(StringRef("\t.set\tmacro"));
-		OutStreamer.EmitRawText(StringRef("\t.set\treorder"));
-		OutStreamer.EmitRawText("\t.end\t" + Twine(CurrentFnSym->getName()));
+			OutStreamer.EmitRawText(StringRef("#\t.set\tat"));
+		OutStreamer.EmitRawText(StringRef("#\t.set\tmacro"));
+		OutStreamer.EmitRawText(StringRef("#\t.set\treorder"));
+		OutStreamer.EmitRawText("#\t.end\t" + Twine(CurrentFnSym->getName()));
 	}
 }
 // .section .mdebug.abi32
@@ -179,10 +179,10 @@ void DSPAsmPrinter::EmitStartOfAsmFile(Module &M) {
  // FIXME: Use SwitchSection.
  // Tell the assembler which ABI we are using
 	 if (OutStreamer.hasRawTextSupport())
-		 OutStreamer.EmitRawText("\t.section .mdebug." + Twine(getCurrentABIString()));
-			  // return to previous section
+		 OutStreamer.EmitRawText("#\t.section .mdebug." + Twine(getCurrentABIString()));
+		  // return to previous section
 	if (OutStreamer.hasRawTextSupport())
-		OutStreamer.EmitRawText(StringRef("\t.previous"));
+		OutStreamer.EmitRawText(StringRef("#\t.previous"));
 }
 MachineLocation
 DSPAsmPrinter::getDebugValueLocation(const MachineInstr *MI) const {
